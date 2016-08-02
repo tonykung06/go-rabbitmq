@@ -17,11 +17,13 @@ type QueueListener struct {
 	conn    *amqp.Connection
 	ch      *amqp.Channel
 	sources map[string]<-chan amqp.Delivery //a registry of sources this coordinator is listening on, this is used to close down the listener when the associated sensors go offline
+	ea      *EventAggregator
 }
 
 func NewQueueListener() *QueueListener {
 	ql := QueueListener{
 		sources: make(map[string]<-chan amqp.Delivery),
+		ea:      NewEventAggregator(),
 	}
 	ql.conn, ql.ch = queueUtils.GetChannel(url)
 	return &ql
@@ -80,5 +82,12 @@ func (ql *QueueListener) AddListener(msgs <-chan amqp.Delivery) {
 		d.Decode(sd)
 
 		fmt.Printf("Received message: %v\n", sd)
+
+		ed := EventData{
+			Name:      sd.Name,
+			Timestamp: sd.Timestamp,
+			Value:     sd.Value,
+		}
+		ql.ea.PublishEvent("MessageReceived_"+msg.RoutingKey, ed)
 	}
 }
