@@ -65,7 +65,7 @@ func getQueue() (*amqp.Connection, *amqp.Channel, *amqp.Queue) { //separating co
 
 	//create a queue or use the existing one if there is one, when the configs of the existing one doesn't match this request, rabbitmq will reject the request and error out
 	q, err := ch.QueueDeclare(
-		"hello", //queue name
+		"hello", //queue name, if empty string, rabbitmq will create a unique name for the queue
 		false,   //durable, if true, save the msg to disk when it is added to the queue, so that will survive server restarts
 		false,   //autoDelete, if true, rabbitmq server will delete the msg if there are no active consumers on that queue. If false, rabbitmq server will keep that msg around until a consumer comes along to receive it
 		false,   //exclusive, if true, only allowing access from the connection that creates this queue. Otherwise, multiple connections to the same queue.
