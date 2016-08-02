@@ -9,3 +9,5 @@
 - `rabbitmq-plugins disable rabbitmq_management`
 - `rabbitmq-plugins enable rabbitmq_management`
 - default rabbitmq management console log credentials: `guest:guest`
+###Run the program
+- `go run ./sensors/sensor.go --help`
