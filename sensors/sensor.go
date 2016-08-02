@@ -36,14 +36,28 @@ func main() {
 	//technically, we only need to tell the broker the routing key(queue name) and dont need to create the queue here
 	//but we need to ensure the queue is there
 	dataQueue := queueUtils.GetQueue(*name, ch)
-	sensorQueue := queueUtils.GetQueue(queueUtils.SensorListQueue, ch)
+
+	//1.
+	//this "direct" exchange doesn't allow multiple consumers, so we need to use fanout exchange to allow multiple consumers to listen on this
+	// sensorQueue := queueUtils.GetQueue(queueUtils.SensorListQueue, ch)
+	// msg := amqp.Publishing{Body: []byte(*name)}
+	// ch.Publish("", sensorQueue.Name, false, false, msg)
+
+	//2.
+	//that is the responsibility of each individual consumer to create a queue to receive messages from fanout exchange
+	//for fanout exchange, msg will be lost if no active queues bound to it
 	msg := amqp.Publishing{Body: []byte(*name)}
-	ch.Publish("", sensorQueue.Name, false, false, msg)
+	ch.Publish(
+		"amq.fanout",
+		"", //queue name is unknown here for the fanout exchange
+		false,
+		false,
+		msg,
+	)
 
 	dur, _ := time.ParseDuration(strconv.Itoa(1000/int(*freq)) + "ms")
 	signal := time.Tick(dur)
 	buf := new(bytes.Buffer)
-	enc := gob.NewEncoder(buf)
 	for range signal {
 		calcValue()
 		reading := dataTransferObject.SensorMessage{
@@ -52,6 +66,7 @@ func main() {
 			Timestamp: time.Now(),
 		}
 		buf.Reset()
+		enc := gob.NewEncoder(buf)
 		enc.Encode(reading)
 		msg := amqp.Publishing{
 			Body: buf.Bytes(),
