@@ -28,6 +28,27 @@ func NewQueueListener() *QueueListener {
 	ql.conn, ql.ch = queueUtils.GetChannel(url)
 	return &ql
 }
+
+func (ql *QueueListener) DiscoverSensors() {
+	ql.ch.ExchangeDeclare(
+		queueUtils.SensorDiscoveryExchange, // name,
+		"fanout", // kind, direct, topic, header or fanout
+		false,    // durable,
+		false,    // autoDelete, delete the exchange if there are no bindings present
+		false,    // internal, true to reject external publishing requests, used in advanced scenarios where exchanges are bound together to form complicated topologies in the broker
+		false,    // noWait,
+		nil,      // args,
+	)
+
+	ql.ch.Publish(
+		queueUtils.SensorDiscoveryExchange, //exchange
+		"",                // key,
+		false,             // mandatory,
+		false,             // immediate,
+		amqp.Publishing{}, // msg,
+	)
+}
+
 func (ql *QueueListener) ListenForNewSouce() {
 	//by default, newly created queue is bound to default exchange
 	q := queueUtils.GetQueue(
@@ -54,11 +75,16 @@ func (ql *QueueListener) ListenForNewSouce() {
 		nil,    // args,
 	)
 
+	ql.DiscoverSensors()
+
+	fmt.Println("listening for new sources")
+
 	//whenever a new fanout msg comes in, it means there is a new sensor ready to publish data via a new queue
 	//then we need to listen to that new queue, whose name is discovered here
 	//NOTE: when we have more than one consumers/coordinators listening on this queue, the default exchange will equally distribute messages to the consumers (one msg will only receive by one consumer)
 	for msg := range msgs {
 		if ql.sources[string(msg.Body)] == nil {
+			fmt.Println("new source discovered")
 			sourceChan, _ := ql.ch.Consume(
 				string(msg.Body), // queue,
 				"",               // consumer,

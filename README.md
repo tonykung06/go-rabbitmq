@@ -11,3 +11,4 @@
 - default rabbitmq management console log credentials: `guest:guest`
 ###Run the program
 - `go run ./sensors/sensor.go --help`
+- `start go run ./coordinator/exec/main.go`

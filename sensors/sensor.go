@@ -37,23 +37,17 @@ func main() {
 	//but we need to ensure the queue is there
 	dataQueue := queueUtils.GetQueue(*name, ch)
 
-	//1.
-	//this "direct" exchange doesn't allow multiple consumers, so we need to use fanout exchange to allow multiple consumers to listen on this
-	// sensorQueue := queueUtils.GetQueue(queueUtils.SensorListQueue, ch)
-	// msg := amqp.Publishing{Body: []byte(*name)}
-	// ch.Publish("", sensorQueue.Name, false, false, msg)
-
-	//2.
-	//that is the responsibility of each individual consumer to create a queue to receive messages from fanout exchange
-	//for fanout exchange, msg will be lost if no active queues bound to it
-	msg := amqp.Publishing{Body: []byte(*name)}
-	ch.Publish(
-		"amq.fanout",
-		"", //queue name is unknown here for the fanout exchange
-		false,
-		false,
-		msg,
+	publishQueueName(ch)
+	discoveryQueue := queueUtils.GetQueue("", ch)
+	ch.QueueBind(
+		discoveryQueue.Name, // name,
+		"",                  // key,
+		queueUtils.SensorDiscoveryExchange, // exchange,
+		false, // noWait,
+		nil,   // args,
 	)
+
+	go listenForDiscoverRequest(discoveryQueue.Name, ch)
 
 	dur, _ := time.ParseDuration(strconv.Itoa(1000/int(*freq)) + "ms")
 	signal := time.Tick(dur)
@@ -74,6 +68,42 @@ func main() {
 		ch.Publish("", dataQueue.Name, false, false, msg)
 		log.Printf("Reading sent. Value: %v\n", value)
 	}
+}
+
+func listenForDiscoverRequest(name string, ch *amqp.Channel) {
+	msgs, _ := ch.Consume(
+		name,  // queue,
+		"",    // consumer,
+		true,  // autoAck,
+		false, // exclusive,
+		false, // noLocal,
+		false, // noWait,
+		nil,   // args,
+	)
+
+	for range msgs {
+		publishQueueName(ch)
+	}
+}
+
+func publishQueueName(ch *amqp.Channel) {
+	//1.
+	//this "direct" exchange doesn't allow multiple consumers, so we need to use fanout exchange to allow multiple consumers to listen on this
+	// sensorQueue := queueUtils.GetQueue(queueUtils.SensorListQueue, ch)
+	// msg := amqp.Publishing{Body: []byte(*name)}
+	// ch.Publish("", sensorQueue.Name, false, false, msg)
+
+	//2.
+	//that is the responsibility of each individual consumer to create a queue to receive messages from fanout exchange
+	//for fanout exchange, msg will be lost if no active queues bound to it
+	msg := amqp.Publishing{Body: []byte(*name)}
+	ch.Publish(
+		"amq.fanout",
+		"", //queue name is unknown here for the fanout exchange
+		false,
+		false,
+		msg,
+	)
 }
 
 func calcValue() {
