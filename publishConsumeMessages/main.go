@@ -45,13 +45,19 @@ func server() {
 	}
 
 	for {
-		ch.Publish("", q.Name, false, false, msg)
+		ch.Publish(
+			"",     //exchange, empty string to denote default exchange "direct"
+			q.Name, //key, the routing key for the queue
+			false,  //mandatory, if true, throwing error if the queue is not there to receive the publishing
+			false,  //immediate, if true, error out if there are no active consumers on the queue now
+			msg,
+		)
 	}
 }
 
 //technically, we need to publish messages to an exchange,
 //there is a shortcut to deal with default exchange (TYPE: direct) and directly publish to a queue (behind the scenes, it goes through the default exchange)
-func getQueue() (*amqp.Connection, *amqp.Channel, *amqp.Queue) { //separating connection and channel to allow multiple channels over a single connection to reduce resouce usage on client and server
+func getQueue() (*amqp.Connection, *amqp.Channel, *amqp.Queue) { //separating connection and channel to allow multiple channels over a single connection, multiple queues over a single channel, to reduce resouce usage on client and server
 	conn, err := amqp.Dial("amqp://guest@localhost:5672")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	ch, err := conn.Channel()
