@@ -54,6 +54,7 @@ func (ql *QueueListener) ListenForNewSouce() {
 	q := queueUtils.GetQueue(
 		"", //empty string queue name, rabbitmq server will generate a unique one
 		ql.ch,
+		true,
 	)
 
 	//rebind the queue to fanout exchange

@@ -35,10 +35,10 @@ func main() {
 
 	//technically, we only need to tell the broker the routing key(queue name) and dont need to create the queue here
 	//but we need to ensure the queue is there
-	dataQueue := queueUtils.GetQueue(*name, ch)
+	dataQueue := queueUtils.GetQueue(*name, ch, false)
 
 	publishQueueName(ch)
-	discoveryQueue := queueUtils.GetQueue("", ch)
+	discoveryQueue := queueUtils.GetQueue("", ch, true)
 	ch.QueueBind(
 		discoveryQueue.Name, // name,
 		"",                  // key,
