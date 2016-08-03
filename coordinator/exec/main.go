@@ -6,8 +6,12 @@ import (
 	"github.com/go-rabbitmq/coordinator"
 )
 
+var dc *coordinator.DatabaseConsumer
+
 func main() {
-	ql := coordinator.NewQueueListener()
+	ea := coordinator.NewEventAggregator()
+	coordinator.NewDatabaseConsumer(ea)
+	ql := coordinator.NewQueueListener(ea)
 	go ql.ListenForNewSouce()
 	fmt.Println("a coordinator is started")
 	var a string

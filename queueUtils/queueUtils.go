@@ -9,6 +9,7 @@ import (
 
 const SensorListQueue = "SensorList"
 const SensorDiscoveryExchange = "SensorDiscovery"
+const PersistReadingsQueue = "PersistReadings"
 
 func GetChannel(url string) (*amqp.Connection, *amqp.Channel) {
 	conn, err := amqp.Dial(url)
@@ -21,10 +22,10 @@ func GetChannel(url string) (*amqp.Connection, *amqp.Channel) {
 func GetQueue(name string, ch *amqp.Channel, autoDelete bool) *amqp.Queue {
 	q, err := ch.QueueDeclare(
 		name,
-		false, //durable
-		false, //autoDelete
-		false, //exclusive
-		false, //noWait
+		false,      //durable
+		autoDelete, //autoDelete, delete queue if no listeners are listening to it
+		false,      //exclusive
+		false,      //noWait
 		nil,
 	)
 	failOnError(err, "Failed to declare queue")
