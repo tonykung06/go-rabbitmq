@@ -1,0 +1,44 @@
+<html>
+	<head>
+		<title>Sensor Monitoring System</title>
+		<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	</head>
+	<body class="container-fluid">
+		<header class="jumbotron">
+			<h1>
+				Sensor Monitoring System
+			</h1>
+		</header>
+		<div class="row" id="chartContainer">
+			
+		</div>
+		<script   src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/jquery.canvasjs.min.js"></script>
+		<script type="text/javascript" src="/public/js/chart.js"></script>
+		<script type="text/javascript">
+			$(function() {
+				createChart($('#chartContainer'), {
+					name: 'boiler_pressure_out',
+					serialNo: 'MPR-728',
+					minSafeValue: 15.1,
+					maxSafeValue: 15.4,
+					unitType: 'MPa'
+				});
+				createChart($('#chartContainer'), {
+					name: 'boiler_pressure_out_2',
+					serialNo: 'MPR-728',
+					minSafeValue: 15.1,
+					maxSafeValue: 15.4,
+					unitType: 'MPa'
+				});
+				createChart($('#chartContainer'), {
+					name: 'boiler_pressure_out_3',
+					serialNo: 'MPR-728',
+					minSafeValue: 15.1,
+					maxSafeValue: 15.4,
+					unitType: 'MPa'
+				});
+			});
+		</script>
+	</body>
+</html>

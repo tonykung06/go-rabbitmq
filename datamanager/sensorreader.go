@@ -24,7 +24,6 @@ func SaveReading(reading *dataTransferObject.SensorMessage) error {
 		VALUES
 			($1, $2, $3)
 	`
-
 	_, err := db.Exec(q, reading.Value, sensors[reading.Name], reading.Timestamp)
 	return err
 }
