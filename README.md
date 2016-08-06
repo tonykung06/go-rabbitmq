@@ -5,6 +5,8 @@
 - `rabbitmqctl status`
 - `rabbitmqctl list_queues`
 - `rabbitmqctl cluster_status`
+- `rabbitmqctl stop`
+- `rabbitmq-service start`
 - `rabbitmq-plugins list`
 - `rabbitmq-plugins disable rabbitmq_management`
 - `rabbitmq-plugins enable rabbitmq_management`
