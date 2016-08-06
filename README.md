@@ -15,4 +15,4 @@
 - `go run ./sensors/sensor.go --help`
 - `start go run ./coordinator/exec/main.go`
 
-###Rabbitmq server runs on port 5672 by default and the Web Management UI works on 15672
+###Rabbitmq server runs on port 5672 by default, and the Web Management UI works on 15672, the default login credential is guest:guest
